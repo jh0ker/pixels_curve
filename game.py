@@ -32,9 +32,31 @@ class Basegame:
         self.simDisplay = led.sim.SimDisplay(size)
         self.screen = pygame.Surface(size)
 
-    def update(self, surface):
+        self.ticks = 0
+
+    # Draws the surface onto the display(s)
+    def update_screen(self, surface):
         self.simDisplay.update(surface)
         self.ledDisplay.update(surface)
+
+    # Gameloop update
+    def update(self):
+        screen = self.screen
+
+        # Count ticks independently of time so the timings won't mess up if the CPU is slow (you don't HAVE to use this,
+        # but I recommend it, since I had problems with this
+        self.ticks += 1
+        ticks = self.ticks
+
+        # Example
+        pixel = pygame.Surface((1, 1))
+        pixel.fill(pygame.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
+        screen.blit(pixel, (random.randint(0, 89), random.randint(0, 19)))
+
+        # Print fps
+        if ticks % 30 == 0:
+            print self.clock.get_fps()
+
 
     def main(self):
 
@@ -49,13 +71,12 @@ class Basegame:
         screen.fill(BLACK)
         screen.blit(write_lobby, (2, 4))
 
-        self.update(screen)
+        self.update_screen(screen)
 
         # Clear event list before starting the game
         pygame.event.clear()
 
         gameover = False
-        ticks = 0
 
         while not gameover:
 
@@ -105,24 +126,18 @@ class Basegame:
                 elif event.button == P2:
                     pass
 
-            # Count ticks independently of time so the timings won't mess up if the CPU is slow
-            ticks += 1
-
             ''' Draw stuff here
             '''
 
-            # Example
-            pixel = pygame.Surface((1, 1))
-            pixel.fill(pygame.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
-            screen.blit(pixel, (random.randint(0, 89), random.randint(0, 19)))
+            self.update()
 
             '''
             '''
 
             # Update screen
-            self.update(screen)
+            self.update_screen(screen)
 
-            # Tick the clock
+            # Tick the clock and pass the maximum fps
             self.clock.tick(30)
 
         # End of the game
@@ -131,7 +146,7 @@ class Basegame:
         screen.fill(BLACK)
         screen.blit(write_gameover, (10, 4))
 
-        self.update(screen)
+        self.update_screen(screen)
 
         # Wait for keypress
         while True:
@@ -146,7 +161,7 @@ class Basegame:
 
         screen.blit(write_gameover, (2, 4))
 
-        self.update(screen)
+        self.update_screen(screen)
 
         # Wait for keypress
         while True:
