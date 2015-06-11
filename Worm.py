@@ -2,6 +2,7 @@
 __author__ = 'Jannes Hoeke'
 
 from Colors import *
+import random
 
 # A Worm
 class Worm(pygame.sprite.OrderedUpdates):
@@ -13,10 +14,22 @@ class Worm(pygame.sprite.OrderedUpdates):
 
         self.position = position
         self.color = color
-        self.direction = self.DOWN
+        if player == 1 or player == 2:
+            self.direction = self.DOWN
+        else:
+            self.direction = self.UP
         self.player = player
 
+        self.gap = 0
+        self.lastgap = 0
+
+        self._rand = random.Random()
+
+        self.lastpos = position
+
     def move(self):
+
+        self.lastpos = self.position
 
         if self.direction == self.UP:
             self.position = (self.position[0], self.position[1] - 1)
@@ -27,6 +40,14 @@ class Worm(pygame.sprite.OrderedUpdates):
         elif self.direction == self.DOWN:
             self.position = (self.position[0], self.position[1] + 1)
 
+        if self.gap == 0 and self._rand.random() < 0.1:
+            self.gap = self._rand.randint(3, 5)
+
+        self.lastgap = self.gap
+
+        if not self.gap == 0:
+            self.gap -= 1
+
         return Head(self.position, self.color)
 
     def turn(self, direction):
@@ -34,6 +55,13 @@ class Worm(pygame.sprite.OrderedUpdates):
             self.direction = (self.direction + 1) % 4
         elif direction == self.LEFT:
             self.direction = (self.direction - 1 + 4) % 4
+
+    def is_gap(self):
+        return not self.gap == 0
+
+    def was_gap(self):
+        return not self.lastgap == 0
+
 
 class Head(pygame.sprite.Sprite):
 

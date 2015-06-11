@@ -38,6 +38,7 @@ class Curve:
         self.screen = pygame.Surface(size)
 
         self.ticks = 0
+        self.fps = 4
         self.gameover = False
         self.winner = None
 
@@ -69,39 +70,57 @@ class Curve:
             screen.blit(write_worms, (2, 4))
 
         elif self.state == GAME:
-            for i in range(self.players):
+            p = range(self.players)
+            for i in p:
                 w = self.worms[i]
 
                 head = w.move()
 
                 dead = False
+                gap = w.is_gap()
 
-                # Check dead worms first, else collision with itself would be triggered twice
-                for w2 in self.dead_worms:
-                    if pygame.sprite.spritecollideany(head, w2):
-                        self.worms.remove(w)
-                        self.dead_worms.append(w)
-                        self.players -= 1
-                        dead = True
+                if head.rect.x < 0 or head.rect.x >= 90 or head.rect.y < 0 or head.rect.y >= 20:
+                    self.worms.remove(w)
+                    self.dead_worms.append(w)
+                    self.players -= 1
+                    p.pop()
+                    dead = True
 
-                for w2 in self.worms:
-                    if pygame.sprite.spritecollideany(head, w2):
-                        self.worms.remove(w)
-                        self.dead_worms.append(w)
-                        self.players -= 1
-                        dead = True
+                if not dead and not gap:
+                    for w2 in self.worms:
+                        if not dead and pygame.sprite.spritecollideany(head, w2):
+                            self.worms.remove(w)
+                            self.dead_worms.append(w)
+                            self.players -= 1
+                            p.pop()
+                            dead = True
+
+                if not dead and not gap:
+                    for w2 in self.dead_worms:
+                        if not dead and pygame.sprite.spritecollideany(head, w2):
+                            self.worms.remove(w)
+                            self.dead_worms.append(w)
+                            self.players -= 1
+                            p.pop()
+                            dead = True
 
                 if not dead:
-                    w.add(head)
-
                     self.screen.blit(head.image, head.rect)
+
+                    if w.was_gap() and screen.get_at(w.lastpos) == w.color:  # Not perfect, erases own old lines
+                        coverup = pygame.Surface((1, 1))
+                        coverup.fill(BLACK)
+                        self.screen.blit(coverup, w.lastpos)
+                    else:
+                        w.add(head)
+
                 elif self.players == 1:
                     self.gameover = True
                     self.winner = self.worms[0].player
                     break
 
         # Print fps
-        if ticks % 30 == 0:
+        if ticks % self.fps == 0:
             print self.clock.get_fps()
 
     def main(self):
@@ -133,7 +152,7 @@ class Curve:
 
                 # End the game
                 if event.button == EXIT:
-                    gameover = True
+                    self.gameover = True
 
                 elif event.type == PUSH and self.state == MENU:
                     if event.button == UP and self.players < 4:
@@ -201,12 +220,11 @@ class Curve:
             self.update_screen(screen)
 
             # Tick the clock and pass the maximum fps
-            self.clock.tick(5)
+            self.clock.tick(self.fps)
 
         # End of the game
         write_gameover = font_text.render("GAME OVER", True, WHITE)
 
-        screen.fill(BLACK)
         screen.blit(write_gameover, (10, 4))
 
         self.update_screen(screen)
@@ -218,10 +236,10 @@ class Curve:
                 break
 
         # Show score
-        screen.fill(BLACK)
         text_gameover = "Winner: " + str(self.winner)
         write_gameover = font_text.render(text_gameover, True, WHITE)
 
+        screen.fill(BLACK)
         screen.blit(write_gameover, (2, 4))
 
         self.update_screen(screen)
