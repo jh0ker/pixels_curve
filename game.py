@@ -38,7 +38,7 @@ class Curve:
         self.screen = pygame.Surface(size)
 
         self.ticks = 0
-        self.fps = 4
+        self.fps = 5
         self.gameover = False
         self.winner = None
 
@@ -111,7 +111,8 @@ class Curve:
                         coverup = pygame.Surface((1, 1))
                         coverup.fill(BLACK)
                         self.screen.blit(coverup, w.lastpos)
-                    else:
+
+                    if not gap:
                         w.add(head)
 
                 elif self.players == 1:
