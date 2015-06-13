@@ -6,6 +6,8 @@ import sys
 from Colors import *
 from led.PixelEventHandler import *
 from Worm import Worm
+from Powerup import Powerup
+import random
 
 """ https://github.com/jh0ker/pixels_curve
     based on https://github.com/HackerspaceBremen/pixels_basegame
@@ -46,13 +48,18 @@ class Curve:
         self.worms = []
         self.surfaces = []
         self.dead_worms = []
+        self.powerups = pygame.sprite.Group()
+        self.pscreen = pygame.Surface(size)
+        self.pscreen.set_colorkey(BLACK)
         self.state = MENU
 
         self._screen = pygame.Surface(size)
+        self._rand = random.Random()
 
     # Draws the surface onto the display(s)
     def update_screen(self):
         self._screen.blit(self.screen, (0, 0))
+        self._screen.blit(self.pscreen, (0, 0))
 
         for s in self.surfaces:
             self._screen.blit(s, (0, 0))
@@ -77,6 +84,8 @@ class Curve:
             screen.blit(write_worms, (2, 4))
 
         elif self.state == GAME:
+
+            # Worm movements
             p = range(self.players)
             for i in p:
                 w = self.worms[i]
@@ -86,7 +95,8 @@ class Curve:
                 dead = False
                 gap = w.is_gap()
 
-                if head.rect.x < 0 or head.rect.x >= 90 or head.rect.y < 0 or head.rect.y >= 20:
+                if head.rect.x < 0 or head.rect.x > 90 - head.rect.width \
+                        or head.rect.y < 0 or head.rect.y > 20 - head.rect.height:
                     self.worms.remove(w)
                     self.dead_worms.append(w)
                     self.players -= 1
@@ -114,16 +124,45 @@ class Curve:
                 self.surfaces[i].fill(BLACK)
                 if not dead:
 
-                    if gap:  # Not perfect, erases own old lines
+                    if gap:
                         self.surfaces[i].blit(head.image, head.rect)
                     else:
                         self.screen.blit(head.image, head.rect)
                         w.add(head)
 
+                    collide = pygame.sprite.spritecollideany(head, self.powerups)
+
+                    if collide:
+                        collide.kill()
+                        if collide.type == Powerup.REVERSE:
+                            for w3 in set(self.worms) - set([w]):
+                                w3.powerups[Powerup.REVERSE] = self.fps * 5
+                        elif collide.type == Powerup.INVISIBLE:
+                            w.gap = self.fps * 5
+                        else:
+                            w.powerups[collide.type] = self.fps * 5
+
                 elif self.players == 1:
                     self.gameover = True
                     self.winner = self.worms[0].player
                     break
+
+            # Spawn powerup
+            if self._rand.random() < 0.05:
+                p = Powerup(self._rand.randint(0, 4), (self._rand.randint(0, 89), self._rand.randint(0, 19)))
+
+                place = not pygame.sprite.spritecollideany(p, self.powerups)
+
+                if place:
+                    for w in self.worms:
+                        if pygame.sprite.spritecollideany(p, w):
+                            place = False
+
+                if place:
+                    self.powerups.add(p)
+
+            self.pscreen.fill(BLACK)
+            self.powerups.draw(self.pscreen)
 
         # Print fps
         if ticks % self.fps == 0:
