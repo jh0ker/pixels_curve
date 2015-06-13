@@ -163,15 +163,15 @@ class Curve:
                     elif event.button == B1:
                         for i in range(self.players):
                             if i == 0:
-                                self.worms.append(Worm((4, 4), RED, 1))
+                                self.worms.append(Worm((9, 4), RED, 1))
                             elif i == 1:
-                                self.worms.append(Worm((84, 4), BLUE, 2))
+                                self.worms.append(Worm((79, 4), BLUE, 2))
                             elif i == 2:
-                                self.worms.append(Worm((4, 14), YELLOW, 3))
+                                self.worms.append(Worm((9, 14), YELLOW, 3))
                             elif i == 3:
-                                self.worms.append(Worm((84, 14), WHITE, 4))
+                                self.worms.append(Worm((79, 14), WHITE, 4))
 
-                            s = pygame.Surface((self.ledDisplay.size()))
+                            s = pygame.Surface(self.ledDisplay.size())
                             s.set_colorkey(BLACK)
                             s.fill(BLACK)
                             self.surfaces.append(s)

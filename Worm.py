@@ -14,10 +14,10 @@ class Worm(pygame.sprite.OrderedUpdates):
 
         self.position = position
         self.color = color
-        if player == 1 or player == 2:
-            self.direction = self.DOWN
+        if player == 1 or player == 3:
+            self.direction = self.RIGHT
         else:
-            self.direction = self.UP
+            self.direction = self.LEFT
         self.player = player
 
         self.gap = 0
@@ -40,13 +40,13 @@ class Worm(pygame.sprite.OrderedUpdates):
         elif self.direction == self.DOWN:
             self.position = (self.position[0], self.position[1] + 1)
 
-        if self.gap == 0 and self._rand.random() < 0.1:
-            self.gap = self._rand.randint(3, 5)
-
         self.lastgap = self.gap
 
         if not self.gap == 0:
             self.gap -= 1
+
+        if self.gap == 0 and self._rand.random() < 0.09:
+            self.gap = self._rand.randint(3, 5)
 
         return Head(self.position, self.color)
 
