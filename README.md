@@ -10,6 +10,15 @@ The game supports 2-4 players. It is similar to the popular game "Snake", but it
 * Player 3/Yellow: Second joystick, left/right 
 * Player 4/White: Second set of buttons, Buttons 1/2
 
+### Powerups
+* Red: Increase speed 
+* Green: Decrease speed
+* Cyan: Increase line thickness of enemies
+* Blue: Invincibility
+* Magenta: Reversed steering of enemies
+
+Colors of powerups are subject to change
+
 ### Planned features:
 * Random spawning and starting-direction
 * Powerups?
