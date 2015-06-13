@@ -48,10 +48,17 @@ class Curve:
         self.dead_worms = []
         self.state = MENU
 
+        self._screen = pygame.Surface(size)
+
     # Draws the surface onto the display(s)
-    def update_screen(self, surface):
-        self.simDisplay.update(surface)
-        self.ledDisplay.update(surface)
+    def update_screen(self):
+        self._screen.blit(self.screen, (0, 0))
+
+        for s in self.surfaces:
+            self._screen.blit(s, (0, 0))
+
+        self.simDisplay.update(self._screen)
+        self.ledDisplay.update(self._screen)
 
     # Gameloop update
     def update(self):
@@ -104,15 +111,13 @@ class Curve:
                             p.pop()
                             dead = True
 
+                self.surfaces[i].fill(BLACK)
                 if not dead:
-                    self.screen.blit(head.image, head.rect)
 
-                    if w.was_gap() and screen.get_at(w.lastpos) == w.color:  # Not perfect, erases own old lines
-                        coverup = pygame.Surface((1, 1))
-                        coverup.fill(BLACK)
-                        self.screen.blit(coverup, w.lastpos)
-
-                    if not gap:
+                    if gap:  # Not perfect, erases own old lines
+                        self.surfaces[i].blit(head.image, head.rect)
+                    else:
+                        self.screen.blit(head.image, head.rect)
                         w.add(head)
 
                 elif self.players == 1:
@@ -136,7 +141,7 @@ class Curve:
         screen.fill(BLACK)
         screen.blit(write_lobby, (2, 4))
 
-        self.update_screen(screen)
+        self.update_screen()
 
         # Clear event list before starting the game
         pygame.event.clear()
@@ -197,7 +202,7 @@ class Curve:
 
                     # Same stuff here
                     elif event.player == PLAYER2:
-                                                # Joysticks
+                        # Joysticks
                         if event.button == LEFT and self.players >= 2:
                             self.worms[1].turn(Worm.LEFT)
                         elif event.button == RIGHT and self.players >= 2:
@@ -218,7 +223,7 @@ class Curve:
             '''
 
             # Update screen
-            self.update_screen(screen)
+            self.update_screen()
 
             # Tick the clock and pass the maximum fps
             self.clock.tick(self.fps)
@@ -228,7 +233,7 @@ class Curve:
 
         screen.blit(write_gameover, (10, 4))
 
-        self.update_screen(screen)
+        self.update_screen()
 
         # Wait for keypress
         while True:
@@ -243,7 +248,7 @@ class Curve:
         screen.fill(BLACK)
         screen.blit(write_gameover, (2, 4))
 
-        self.update_screen(screen)
+        self.update_screen()
 
         # Wait for keypress
         while True:
